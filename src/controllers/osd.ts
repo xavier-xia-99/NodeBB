@@ -2,17 +2,13 @@ import { Request, Response, NextFunction, Locals } from 'express';
 import xml from 'xml';
 import nconf from 'nconf';
 
-import plugins from '../plugins';
-import meta from '../meta';
+import * as plugins from '../plugins';
+import * as meta from '../meta';
 
 
 function trimToLength(string: string, length: number): string {
     return string.trim().substring(0, length).trim();
 }
-
-
-
-// import * as nconf from 'nconf'; // Assuming nconf is a module you're using
 
 interface Image {
     _attr: {
@@ -52,6 +48,9 @@ function generateXML(): string {
         },
     };
 
+    // const { title } = meta.config.title;
+    // const browserTitle = meta.config?.browserTitle?.trim();
+
     const ret = [{
         OpenSearchDescription: [
             {
@@ -60,15 +59,16 @@ function generateXML(): string {
                     'xmlns:moz': 'http://www.mozilla.org/2006/browser/search/',
                 },
             },
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             { ShortName: trimToLength(String(meta.config.title || meta.config.browserTitle || 'NodeBB'), 16) },
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             { Description: trimToLength(String(meta.config.description || ''), 1024) },
             { InputEncoding: 'UTF-8' },
             { Image: [myImage, `${baseUrl}/favicon.ico`] },
             { Url: myUrl },
             { 'moz:SearchForm': `${baseUrl}/search` },
         ],
-    }]
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    }];
     return xml(ret, { declaration: true, indent: '\t' });
 }
 
