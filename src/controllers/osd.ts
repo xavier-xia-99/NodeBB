@@ -1,9 +1,11 @@
 import { Request, Response, NextFunction, Locals } from 'express';
-import xml from 'xml';
+// import xml from 'xml';
 import nconf from 'nconf';
 
+// import * as parser from 'xml2json';
 import * as plugins from '../plugins';
 import * as meta from '../meta';
+// import * as convert from 'xml-js';
 
 
 function trimToLength(string: string, length: number): string {
@@ -27,7 +29,7 @@ interface Url {
 }
 
 // Define the generateXML function with TypeScript signature
-function generateXML(): string {
+function generateXML(): object {
     const myImage: Image = {
         _attr: {
             width: '16',
@@ -38,7 +40,6 @@ function generateXML(): string {
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     const baseUrl : string = nconf.get('url') as string; // casted as string
-    console.log('Url : ', baseUrl);
     const myUrl: Url = {
         _attr: {
             type: 'text/html',
@@ -46,11 +47,6 @@ function generateXML(): string {
             template: `${baseUrl}/search?term={searchTerms}&in=titlesposts`,
         },
     };
-    console.log('my url object : ', myUrl);
-
-    // const { title } = meta.config.title;
-    // const browserTitle = meta.config?.browserTitle?.trim();
-
     const ret = [{
         OpenSearchDescription: [
             {
@@ -69,20 +65,13 @@ function generateXML(): string {
             { 'moz:SearchForm': `${baseUrl}/search` },
         ],
     }];
-    return xml(ret, { declaration: true, indent: '\t' });
+    // return xml(ret, { declaration: true, indent: '\t' });
+    return ret;
 }
 
 export const handle = function (_req: Request, res: Response<object, Locals>, next: NextFunction): void {
-    const xmlString : string = generateXML();
-    console.log('xml string : ', xmlString);
-    const xmlObj : object = JSON.parse(xmlString) as object;
-    console.log('xml Object : ', xmlObj);
-    console.info('xml Object : ', xmlObj);
-    console.log();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    // const body : object = JSON.parse(xmlString); //Tried different parser
     if (plugins.hooks.hasListeners('filter:search.query')) {
-        res.type('application/opensearchdescription+xml').send(xmlObj);
+        res.type('application/opensearchdescription+xml').send(generateXML());
     } else {
         next();
     }
