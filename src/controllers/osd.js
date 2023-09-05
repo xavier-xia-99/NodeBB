@@ -47,7 +47,6 @@ function generateXML() {
     };
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     const baseUrl = nconf_1.default.get('url'); // casted as string
-    console.log('Url : ', baseUrl);
     const myUrl = {
         _attr: {
             type: 'text/html',
@@ -55,9 +54,6 @@ function generateXML() {
             template: `${baseUrl}/search?term={searchTerms}&in=titlesposts`,
         },
     };
-    console.log('my url object : ', myUrl);
-    // const { title } = meta.config.title;
-    // const browserTitle = meta.config?.browserTitle?.trim();
     const ret = [{
             OpenSearchDescription: [
                 {
@@ -80,16 +76,6 @@ function generateXML() {
     return ret;
 }
 const handle = function (_req, res, next) {
-    // const xmlString : string = generateXML();
-    // console.log('xml string : ', xmlString);
-    // // const options: parser.jsonOptions = { object: true };
-    // // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    // const xmlObj : string = convert.xml2json(xmlString, { compact: true, spaces: 4 });
-    // const res : object = JSON.parse(xmlObj) as object;
-    // console.log('xml Object : ', xmlObj);
-    // console.info('xml Object : ', xmlObj);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    // const body : object = JSON.parse(xmlString); //Tried different parser
     if (plugins.hooks.hasListeners('filter:search.query')) {
         res.type('application/opensearchdescription+xml').send(generateXML());
     }
