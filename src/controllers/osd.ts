@@ -26,8 +26,6 @@ interface Url {
     };
 }
 
-
-
 // Define the generateXML function with TypeScript signature
 function generateXML(): string {
     const myImage: Image = {
@@ -38,8 +36,9 @@ function generateXML(): string {
         },
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const baseUrl: string = nconf.get('url', null);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    const baseUrl : string = nconf.get('url') as string; // casted as string
+    console.log('Url : ', baseUrl);
     const myUrl: Url = {
         _attr: {
             type: 'text/html',
@@ -47,6 +46,7 @@ function generateXML(): string {
             template: `${baseUrl}/search?term={searchTerms}&in=titlesposts`,
         },
     };
+    console.log('my url object : ', myUrl);
 
     // const { title } = meta.config.title;
     // const browserTitle = meta.config?.browserTitle?.trim();
@@ -59,9 +59,9 @@ function generateXML(): string {
                     'xmlns:moz': 'http://www.mozilla.org/2006/browser/search/',
                 },
             },
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             { ShortName: trimToLength(String(meta.config.title || meta.config.browserTitle || 'NodeBB'), 16) },
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
             { Description: trimToLength(String(meta.config.description || ''), 1024) },
             { InputEncoding: 'UTF-8' },
             { Image: [myImage, `${baseUrl}/favicon.ico`] },
@@ -72,13 +72,17 @@ function generateXML(): string {
     return xml(ret, { declaration: true, indent: '\t' });
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
 export const handle = function (_req: Request, res: Response<object, Locals>, next: NextFunction): void {
-    const xmlString = generateXML();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const body : object = JSON.parse(xmlString);
+    const xmlString : string = generateXML();
+    console.log('xml string : ', xmlString);
+    const xmlObj : object = JSON.parse(xmlString) as object;
+    console.log('xml Object : ', xmlObj);
+    console.info('xml Object : ', xmlObj);
+    console.log();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    // const body : object = JSON.parse(xmlString); //Tried different parser
     if (plugins.hooks.hasListeners('filter:search.query')) {
-        res.type('application/opensearchdescription+xml').send(body);
+        res.type('application/opensearchdescription+xml').send(xmlObj);
     } else {
         next();
     }
