@@ -27,10 +27,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.handle = void 0;
-const xml_1 = __importDefault(require("xml"));
+// import xml from 'xml';
 const nconf_1 = __importDefault(require("nconf"));
+// import * as parser from 'xml2json';
 const plugins = __importStar(require("../plugins"));
 const meta = __importStar(require("../meta"));
+// import * as convert from 'xml-js';
 function trimToLength(string, length) {
     return string.trim().substring(0, length).trim();
 }
@@ -43,8 +45,9 @@ function generateXML() {
             type: 'image/x-icon',
         },
     };
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const baseUrl = nconf_1.default.get('url', null);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    const baseUrl = nconf_1.default.get('url'); // casted as string
+    console.log('Url : ', baseUrl);
     const myUrl = {
         _attr: {
             type: 'text/html',
@@ -52,6 +55,7 @@ function generateXML() {
             template: `${baseUrl}/search?term={searchTerms}&in=titlesposts`,
         },
     };
+    console.log('my url object : ', myUrl);
     // const { title } = meta.config.title;
     // const browserTitle = meta.config?.browserTitle?.trim();
     const ret = [{
@@ -62,9 +66,9 @@ function generateXML() {
                         'xmlns:moz': 'http://www.mozilla.org/2006/browser/search/',
                     },
                 },
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 { ShortName: trimToLength(String(meta.config.title || meta.config.browserTitle || 'NodeBB'), 16) },
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
                 { Description: trimToLength(String(meta.config.description || ''), 1024) },
                 { InputEncoding: 'UTF-8' },
                 { Image: [myImage, `${baseUrl}/favicon.ico`] },
@@ -72,15 +76,22 @@ function generateXML() {
                 { 'moz:SearchForm': `${baseUrl}/search` },
             ],
         }];
-    return (0, xml_1.default)(ret, { declaration: true, indent: '\t' });
+    // return xml(ret, { declaration: true, indent: '\t' });
+    return ret;
 }
-// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
 const handle = function (_req, res, next) {
-    const xmlString = generateXML();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const body = JSON.parse(xmlString);
+    // const xmlString : string = generateXML();
+    // console.log('xml string : ', xmlString);
+    // // const options: parser.jsonOptions = { object: true };
+    // // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    // const xmlObj : string = convert.xml2json(xmlString, { compact: true, spaces: 4 });
+    // const res : object = JSON.parse(xmlObj) as object;
+    // console.log('xml Object : ', xmlObj);
+    // console.info('xml Object : ', xmlObj);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    // const body : object = JSON.parse(xmlString); //Tried different parser
     if (plugins.hooks.hasListeners('filter:search.query')) {
-        res.type('application/opensearchdescription+xml').send(body);
+        res.type('application/opensearchdescription+xml').send(generateXML());
     }
     else {
         next();
