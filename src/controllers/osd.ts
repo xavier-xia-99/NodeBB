@@ -1,11 +1,8 @@
 import { Request, Response, NextFunction, Locals } from 'express';
-// import xml from 'xml';
 import nconf from 'nconf';
 
-// import * as parser from 'xml2json';
 import * as plugins from '../plugins';
 import * as meta from '../meta';
-// import * as convert from 'xml-js';
 
 
 function trimToLength(string: string, length: number): string {
